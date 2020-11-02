@@ -1,0 +1,215 @@
+---
+title: "EDA Zusammenfassung LE2: Data Preparation"
+output: html_notebook
+---
+
+# Data Wrangling
+
+EDA fokussiert speziell auf die Transformation von Data Frames
+Geeignet hierfür ist dplyr da:
+- Schnell
+- Direkte Verbindung und Analyse innerhalb externen Datenbanken
+- Übersichtlich durch Verkettung von Funktionen
+- Syntaktische Einfachheit
+
+Alternativen sind z.B. data.table, Base R
+Weiter Ressourcen zu dplyr:
+https://r4ds.had.co.nz/transform.html
+Dplyr Cheatsheet: https://rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf
+
+
+```{r}
+# Paket laden
+library(dplyr)
+```
+
+- Ähnlichkeit mit SQL
+- Verküpfung mit %>%
+
+die wichtigsten Funktionalitäten
+- filter() und select(): Zeilen und spalten selektieren
+- mutate(): neue Variablen erzeugen
+- summarise(): Statistiken erzeugen
+- group_by(): Daten zusammenfassen
+- bind_rows() und bind_cols(): Datensätze kombinieren
+- *_join(): relationale Datensätze kombinieren
+- pivot_long() und pivot_wide(): Daten-Layout verändern
+
+## filter()
+Daten mit einer Bedingung auswählen
+
+Syntax: filter(meine_daten, meine_bedingung)
+Beispiel: filter(iris, Sepal.Length > 7)
+Alternative iris[iris$Sepal.Lenght >7, ]
+
+Verwandte Funktionen
+- distinct()
+- slice_head(), slice_tail(), slice_min(), slice_max()
+- slice_sample(), sample_n(), sample_frac()
+- arrange()
+
+## select()
+Variablen via Namens auswählen
+
+Syntax: (meine_daten, meine_variablen)
+Beispiel: select(iris, Sepal.Length, Species)
+Alternative: iris[, c("Sepal.Length", "Species")]
+
+Verwandte Funktionen
+- select(..., contains())
+- select(..., starts_with()), select(..., ends_with())
+- select(..., column_A:column_B)
+- select(..., -column_A)
+- relocate()
+
+## mutate()
+Neue Variabel aus bestehenden berechen
+
+- Syntax: mutate(meine_Daten, neue_Variable = ...)
+- Beispiel: mutate(iris, Sepal_l2w = Sepal.Length/Sepal.Width)
+- Alternative: iris$Sepal_l2w <- iris$Sepal.Length/iris$Sepal.Width
+
+# summarise()
+Neue statistische Kennzahlen aus bestehenden Variaben berehcnen
+
+- Syntax: summarise(meine_daten, neue_statistk = function(...))
+- Beispiel: summarise(iris, mean_SL = mean(Sepal.Lenght), medial_SL = median(Sepal.Lenght))
+- Alternative: mean_SL <- mean(iris$Sepal.Lenght) und median_SL <- median(iris$Sepal.Lenght)
+
+# group_by()
+Gruppierte Kopie der Daten
+
+- Syntax: group_by(meine_Daten, kategoriale_Variable)
+- Beispiel: group_by(iris, Species)
+- Alternative: by(iris, INDICES = ...)
+
+Der grösste Nutzen liegt in der Verkettung von Gruppierungen mit Erzeugung neuer Variablen (mutate) oder statistischer Kennzahlen (summarise) via Pipes (%>%)
+
+Beispiel 1: iris %>% group_by(Species) %>% summarise(n_obs = n(), mean_l = mean(Sepal.Length)) %>% ungroup()
+
+Beispiel 2: iris %>% group_by(Species) %>% mutate(Petal.Width.centered = Petal.Width - mean(Petal.Width)) %>% ungroup()
+
+Es wird empfohlen zum Schluss ungroup() einzusetzen, damit keine unerwünschten Effekte in Folgeanalysen auftauchen.
+
+```{r}
+# Lade Beispieldaten
+avengers <- read.csv('data/avengers.csv')
+superheros <- read.csv('data/superheros.csv')
+publisher <- read.csv('data/publisher.csv')
+
+avengers
+superheros
+publisher
+```
+
+
+# bind_rows() / bind_cols()
+Kombinieren von Dataframes
+
+Syntax: bind_rows(meine_Daten, meine_Daten2)
+Beispiel: bind_rows(avengers, superheros)
+
+Syntax: bind_cols(meine_Daten, meine_Daten2)
+Beispiel: bind_cols(avengers, superheros)
+
+bind_rows() kombiniert Zeilen von x und y sequenziell, wobie übereinstimmende Beobachtungen in x und y zu Duplikatoine führt. Spalten werden nach Namen abgeglichen, fehlende Spalten nach NA befüllt.
+
+bind_cols() gleicht Zeilen nach Position ab, d.h. die Datensätze müssen die gleiche Anzahl von Zeilen haben
+
+```{r}
+bind_rows(avengers,superheros)
+# Magento ist nun zweimal vorhanden
+
+bind_cols(avengers,superheros)
+```
+
+# union() / intersect() / setdiff()
+
+Syntax: union(meine_Daten, meine_Daten2)
+Beispiel: union(avengers, superheros)
+
+Syntax: intersect(meine_Daten, meine_Daten2)
+Beispiel: intersect(avengers, superheros)
+
+union() analog bind_rows(), Duplikate werden aber entfernt
+intersect() schnittmenge der Daten, Duplikate werden entfernt
+
+```{r}
+union(avengers, superheros)
+# Magento ist nur noch einmal vorhanden
+
+intersect(avengers, superheros)
+# Nur noch Magento ist vorhanden
+```
+
+```{r}
+library(imager)
+
+# Mengenoperationen
+load.image('data/union_intersect.png') %>% plot
+
+#Joins
+load.image('data/joins.png') %>% plot
+
+```
+
+# inner_join() / semi_join()
+
+Syntax: inner_join(meine_Daten, meine_Daten2, key="key")
+Syntax: semi_join(meine_Daten, meine_Daten2, key="key")
+
+Kombination von Daten anhand eines Schlüsselattributs (key)
+
+inner_join() gibt alle Zeilen von x und y mit übereinstimmenden Key zurück. Bei mehrere Übereinstimmungen werden alle Kombinationen zurückgegeben.
+
+semi_join() gibt nur Spalten aus x zurück & dupliziert nie Zeilen von x
+
+```{r}
+inner_join(avengers,publisher,key='publisher')
+
+semi_join(avengers,publisher,key='publisher')
+```
+
+
+# full_join() / anti_join()
+
+Syntax: full_join(meine_Daten, meine_Daten2, key="key")
+Syntax: anti_join(meine_Daten, meine_Daten2, key="key")
+
+full_join() gibt alle Zeilen und Spalten zurück
+anti_join() gibt alle Zeilen von x ohne übereinstimmende Werte in y zurück und liefert nur Spalten von x
+
+```{r}
+full_join(avengers,publisher,key='publisher')
+
+anti_join(avengers,publisher,key='publisher')
+```
+
+# left_join() / right_join()
+
+Syntax: left_join(meine_Daten, meine_Daten2, key="key")
+Syntax: right_join(meine_Daten, meine_Daten2, key="key")
+
+left_join() alle Zeilen von x und alle Spalten von x und y
+right_join() gerade umgekehrt
+
+# Tidy Data
+
+Das Prinzip ordentlicher Datenhaltung:
+
+1. Jede Variable hat eine eigene Spalte
+2. Jede Beobachtung hat eine eigene Zeile
+3. Jeder Wert hat eine eigene Zelle
+
+```{r}
+load.image('data/tidydata.png') %>% plot
+```
+
+# pivot_wider() / pivot_longer()
+
+Syntax: pivot_wider(meine_Daten, names_from = Beziechnung_Messung, values_from = Wert_Messung)
+Syntax: pivot_longer(meine_Daten, cols = meine_Pivotspalten, names_to = Bezeichung_Messung, values_to = Wert_Messung)
+
+pivot_wider() wird verwendet um Ordnung in Daten zu bringen, in denen eine Beobachtung über mehrere Zeilen verteilt ist.
+
+pivot_longer() wird verwendet um Ordnung in Daten zu bringen, in denen eine Beobachtung über mehrere Spalten verteilt ist

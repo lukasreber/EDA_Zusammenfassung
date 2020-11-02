@@ -1,0 +1,185 @@
+---
+title: "EDA Zusammenfassung LE1"
+output: html_notebook
+---
+
+# R Basics
+
+Weiterführende Links:
+• R Tutorial www.r-tutor.com/r-introduction
+• R Programming for Data Science https://bookdown.org/rdpeng/rprogdatascience/ 
+• Best Practices for Writing R Code https://swcarpentry.github.io/r-novice-inflammation/06-best-practices-R/ 
+• Hadley Wickham’s tidyverse Style Guide https://style.tidyverse.org/index.html 
+• Exploratory Data Analysis with R https://bookdown.org/rdpeng/exdata/ 
+
+## Klassen und Typen
+- Character
+- Numeric
+- Integer
+- Logical
+- Complex
+
+```{r}
+atomic_object <- c("a", "b", "c") # character
+atomic_object
+
+atomic_object <- c(0.5, 0.6) # numeric
+atomic_object
+
+atomic_object <- 9:21 # integer
+atomic_object
+
+atomic_object <- c(TRUE,FALSE) # logical
+atomic_object
+```
+
+Überführen von Objekt-Klassen mittels as.*() Funktion
+
+```{r}
+atomic_object <- 0:6
+class(atomic_object)
+
+as.numeric(atomic_object)
+
+as.logical(atomic_object)
+
+as.character(atomic_object)
+```
+
+Atomare Objekt-Klassen können gemischt werden
+
+```{r}
+mixed_object <- c(1.4, "a")
+mixed_object
+
+mixed_object <- c(TRUE, 2)
+mixed_object
+```
+
+Es gibt 5 grundlegende Objekt-Typen
+- Vektor: Atomare Objekte derselben Klasse
+- Matrix: Vektoren gleicher Länge und Klasse in zweidimensionaler Form
+- Dataframe: unterschiedliche Klassen und gleiche Länge (Tabelle)
+- Liste: unterschiedliche Klassen und nicht gleiche Länge (nicht tabellarisch)
+- Faktor: kategoriale Daten in geordneter oder ungeordneter Form
+
+```{r}
+x <- 1:6
+
+# Vector
+v <- as.vector(x)
+v
+# Matrix
+m <- matrix(v, nrow=2, ncol=3)
+m
+
+# Liste
+l <- list(x, TRUE, c(2.7, 3.1415), c("EDA", "DAW", "GDB", "RSY") )
+l
+
+# Faktor
+x1 <- c("M", "M", "F") 
+f1 <- factor(x1,
+  levels = c("F", "M"), 
+  labels = c("Female","Male"))
+f1
+
+kleidergrösse <- c("S", "M", "L", "XS", "XL")
+kleidergrösse_ord <-
+  factor(kleidergrösse,
+         ordered = TRUE,
+         levels = c("XS","S","M","L","XL"),
+         labels = c("Sehr klein","Klein","Mittel","Gross","Sehr gross"))
+kleidergrösse_ord  
+```
+
+## Fehlende Informationen
+Manchmal fehlen Daten, wobei drei unterschiedliche Situationen unterschieden werden:
+- MCAR (missing completely at random) fehlende Werte treten pro Klasse völlig zufällig auf,
+- MAR (missing at random) fehlende Werte treten innerhalb beobachteter Gruppen zufällig und mit gleicher Wahrscheinlichkeit auf,
+- MNAR (missing not at random) fehlende Werte treten nicht zufällig auf, den Grund kennt man aber nicht.
+Beispiel:
+- Elektrische Waage mit Wackelkontakt -> MCAR
+- Elektrische Waage misst nicht auf weicher Unterlage -> MAR
+- Elektrische Waage misst nicht, möglicherweise wegen Fatigue -> MNAR
+
+Weiter Infos: https://uc-r.github.io/missing_values
+
+Definition
+Missing Values = NA
+nichtdefinierte mathematische Operationen = NaN (Not a number)
+
+NA haben eine Klasse, z.B. Integer NA, Charachter NA usw.
+
+Objekte können getestet werden mit is.na() und is.nan()
+
+NaN == NA
+NA != NaN
+
+```{r}
+v1 <- c(1, 2, NA, 10, 3)
+is.na(v1)
+is.nan(v1)
+
+v2 <- c(1,2,NaN,NA,4)
+is.na(v2)
+is.nan(v2)
+```
+
+## Scripting mit R
+
+```{r}
+# Definition von Paramenter
+path <- "../bla/blu/bli"
+input_file <- "doesntexist.csv"
+output_file <- "alsononexistend.csv"
+
+# Daten einlesen
+data_input <- read.csv(paste0(path, input_file))
+
+#Zufallsstickprobe ziehen
+sample_number <- sample(nrow(data_input), 5)
+
+# Resultat berechnen
+extract_results <- input_data[sample_number,"TotalChanges"]
+
+# Resultat speichern
+write.table(extract_results, output_file)
+```
+
+Wichtige Punkte beim Scripting:
+- Kommentare für bessere Leserlichkeit und Nachvollziehbarkeit
+- Variablen und Funktionen mit Kleinbuchstaben; Wörter mit underscores trennen
+- Zuweisungen mit "<-"
+- Relative Pfade verwenden
+- Code in kleine übersichtliche Stücke zerlegen
+- Keine Abstände bei Code in Klammern
+- Abstände um binäre Operatoren (=, +, -, <-, usw.) sowei nach dem Komma
+- Einrücken mit 2 Leerschlägen
+- Öffnende geschweifte Klammer zuhinters auf bestehender Zeile; Klammern schliessen auf neuer Zeile
+- Repetitive Operationen als Funktion speicher in separatem File
+
+## Funktionen in R
+- Jede Funktion hat ihr eigenes Environment, Variablen sind nur dort bekannt
+- Jede R Session ist ein Environment
+- Ist eine Variable in einer Funktion nicht bekannt, sucht R rekursiv zuerst in der R Session und dann in der Search List
+
+```{r}
+# Beispiel R Funktion
+fahrenheit_to_celsius <- function(temp_F) { 
+  temp_C <- (temp_F - 32) * 5 / 9
+  return(temp_C)
+}
+fahrenheit_to_celsius(100)
+```
+
+- R verfügt über if/else, for, while, repeat, next und break
+- Schleifen sind wesentlich langsamer als in C++
+- Bei weniger als 100'000 Iterationen aber grundsätzlich kein Problem
+- Es ist besser ein Objekt zu erzeugen und dies iterativ zu befüllen
+
+Weitere Infos hier: https://swcarpentry.github.io/r-novice-inflammation/15-supp-loops-in-depth/
+und hier: https://privefl.github.io/blog/why-loops-are-slow-in-r/
+
+
+
