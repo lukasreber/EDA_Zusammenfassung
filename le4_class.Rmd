@@ -1,0 +1,72 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+library(tidyverse)
+
+customers <- read_csv('customer.csv')
+```
+
+```{r}
+summary(customers)
+str(customers)
+```
+
+```{r}
+head(customers, 10)
+```
+
+```{r}
+customers[sample(nrow(customers),3),]
+```
+
+```{r}
+is.na(customers)
+```
+
+```{r}
+customers$complete <- complete.cases(customers)
+customers
+```
+
+```{r}
+customers %>% count(complete)
+```
+
+```{r}
+customers %>% summarise(n_complete_obs = sum(complete))
+```
+
+```{r}
+sum(duplicated(customers))
+```
+
+```{r}
+customers <- customers %>% mutate(PaymentMethod = replace(PaymentMethod, PaymentMethod == "--", NA))
+```
+
+```{r}
+customers <- customers %>% mutate(TotalCharges = as.numeric(TotalCharges))
+```
+
+```{r}
+customers
+```
+
+```{r}
+median(customers$MonthlyCharges, na.rm = TRUE)
+```
+
+```{r}
+customers_neu <- customers %>%
+  mutate(TotalCharges = replace(TotalCharges, is.na(TotalCharges), median(TotalCharges, na.rm = T)))
+```
+
+```{r}
+customers_neu
+```
+

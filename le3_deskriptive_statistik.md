@@ -1,5 +1,16 @@
 # Deskriptive Statistik
 
+## Grundbegriffe
+
+* Diskrete Merkmale: eine abzählbare Menge (bsp. Schulnoten, Teilnehmer)
+* Stetige Merkmale: unendliche viele Ausprägungen (z.B. Strecke)
+
+* Nominale Daten: keine Rangordnung
+* Ordinale Daten: Rangordnung (Schulnoten, usw.)
+
+* univariat Statistiken: Masszahlen welche sich auf ein einziges Merkmal beziehen. Hauptsächlich Masse, welche die zentrale Lage einer Verteilung charakterisieren (Mittelwert) und die Streuung der Daten
+* bivariate Statistiken: den Zusammenhang zwischen zwei Merkmalen
+
 ## Verteilungen
 
 Daten können unterschiedlich verteilt sein. Wir unterscheiden folgende Masszahlen:
@@ -19,12 +30,18 @@ Daten können unterschiedlich verteilt sein. Wir unterscheiden folgende Masszahl
 * Einfach zu berechnen
 * nicht robust
 * nimmt Werte an die in der Population nicht vorkommen
+* Wird durch das 1. Moment quantifiziert
 
 ### Gestutztes Mittel
 
 * $x_{trim}$
 * alle Werte sortiert, m grösste und m kleisnte Werte entfernt, anschliessend Summer restliche Werte durch Anzahl Werte dividiert
-* R Syntax: mean(x, trim= 0.1)
+* R Syntax:
+
+```r
+mean(x, trim= 0.1)
+```
+
 * weniger einfach zu berechnen
 * relativ robust
 * nimmt Werte an die in der Population nicht vorkommen
@@ -33,9 +50,15 @@ Daten können unterschiedlich verteilt sein. Wir unterscheiden folgende Masszahl
 
 * $x_{med}$
 * alle Werte sortieren, mittleren Wert wählen
-* R Syntax: median(x, na.rm = FALSE)
+* R Syntax:
+
+```r
+median(x, na.rm = FALSE)
+```
+
 * sehr robust
 * nimmt Werte an die in der Population vorkommen
+* es muss sich um ordinale Daten handeln
 
 ### Modus
 
@@ -55,6 +78,7 @@ Arithmetisches Mittel, Median und Modus können gebraucht werden, um Schiefe der
 
 ### Empirische Varianz
 
+* Wird durch das 2. Moment quantifiziert
 * $var=s_x^2=\frac{1}{n}\sum_{i=1}^{n} (x_i-\overline{x})^2$
 * Durchschnittliche quadrierte Abweichung vom arithemtischen Mittel aufsummiert und durch Anzahl Werte dividiert
 * R Syntax:
@@ -89,9 +113,11 @@ IQR(x, na.rm = FALSE)
 mad(x, constant = 1.4826, na.rm = FALSE)
 ```
 
-* Variationskoeffizient
+### Variationskoeffizient
+
 * $cv=\frac{s_x}{\overline{x}}$
 * Quotient aus Standardabweichung und Mittelwert
+* Ermöglicht den Vergleich von verschiedenen Standardabweichungen, die unterschiedliche Mittelwerte besitzen
 
 ## Symmetrie- oder Schiefemasse / Wölbungmasse
 
