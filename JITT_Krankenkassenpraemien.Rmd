@@ -1,0 +1,128 @@
+---
+title: "Mini-Challenge EDA - Krankenkassenprämien von Privatkunden"
+output: html_notebook
+---
+
+Load Packages
+
+```{r}
+library(tidyverse)
+library(moments)
+library(skimr)
+```
+
+Import the data
+
+```{r}
+data = read.csv('./data/versicherung_krankenkassenpraemie.csv')
+```
+
+Overview of the data
+
+```{r}
+str(data)
+```
+
+```{r}
+glimpse(data)
+```
+
+```{r}
+summary(data)
+```
+
+```{r}
+skim(data)
+```
+
+get a closer look at age distribution
+
+```{r}
+ggplot(data, aes(age)) +
+  geom_density()
+```
+
+5 Point Summary for age
+
+```{r}
+ggplot(data, aes("", age)) +
+  geom_boxplot() +
+  geom_point(position="jitter",alpha=0.2)
+```
+
+There seems to be an even distribution around all age groups
+
+Check for connections between different variables
+
+```{r}
+ggplot(data, aes(age,color=smoker)) +
+  geom_density()
+```
+
+
+```{r}
+ggplot(data, aes(region,fill=smoker)) +
+  geom_bar()
+```
+
+
+Check if there is a connection between age and charges
+
+```{r}
+ggplot(data, aes(age,charges)) +
+  geom_point()
+```
+
+There is indeed. In general charges seem to be higher, with higher age. 
+There seems to also be a split of the charges in three groups. Lets see why that is.
+
+```{r}
+ggplot(data, aes(age,charges,color=region)) +
+  geom_point()
+```
+
+Its definitely not regions.
+
+```{r}
+ggplot(data, aes(age,charges,color=smoker)) +
+  geom_point(position="jitter")
+```
+
+Not really suprisingly there is a correlation between charges and smokers. where in general, non smokers pay much less.
+
+```{r}
+ggplot(data, aes(charges,bmi)) +
+  geom_smooth()
+```
+
+I need to have a closer look at the bmi values
+
+```{r}
+ggplot(data, aes(bmi)) +
+  geom_histogram()
+```
+
+```{r}
+summary(data$bmi)
+sd(data$bmi)
+moments::skewness(data$bmi)
+moments::kurtosis(data$bmi)
+```
+
+```{r}
+data <- data %>% mutate(bmi_gr = as.factor(case_when( bmi < 10.0 ~ "nicht überlebensfähig",
+                             bmi < 18.5 ~ "untergewichtig",
+                             bmi < 25.0 ~ "normalgewichtig",
+                             bmi < 30.0 ~ "übergewichtig",
+                             bmi >=30.0 ~ "behandlungsbedürftig",
+                             TRUE ~ "unbekannt")))
+```
+
+
+
+```{r}
+str(data)
+```
+
+
+
